@@ -1,14 +1,20 @@
-import React, { useState } from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect } from 'react';
 import Slider from 'react-slick';
 import { useHistory } from 'react-router-dom';
+import axios from 'axios';
+
+// API
+import { headersConfiguration, API, API_URL } from '../../Config';
 
 // COMPONENT
 import { Card, BigCard } from '../../components/card';
-import { Product } from '../../components/product';
+import { Products } from '../../components/product';
 import { Collapse } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleUp } from '@fortawesome/free-solid-svg-icons';
 import { faAngleDown } from '@fortawesome/free-solid-svg-icons';
+import { Greeting } from '../../components/greeting';
 
 // STYLE
 import {
@@ -17,7 +23,6 @@ import {
   HomePageHeaderTitle,
   HomePageContent,
   MapInput,
-  FeaturedContainer,
   InnerHomePageContent,
   WhatNewContainer,
   SliderContainer,
@@ -27,15 +32,32 @@ import {
 import HomeHeader from '../../assets/images/homeHeader.svg';
 import Point from '../../assets/images/point.svg';
 
+// INTERFACE
+import { ProductItem, HotNew } from '../../interface';
+
 interface TProps {
   address: string;
 }
 
+interface Metadata {
+  products: ProductItem[];
+  news: HotNew[];
+  featured_products: ProductItem[];
+}
+
+interface TState extends Metadata {
+  collapsed: boolean;
+}
+
 export const HomePage = ({ address }: TProps) => {
-  const [collapsed, setCollapsed] = useState<boolean>(false);
+  const [localState, setLocalState] = useState<TState>({
+    products: [],
+    news: [],
+    featured_products: [],
+    collapsed: false,
+  });
+
   const history = useHistory();
-  const currentDate = new Date();
-  const currentHour = currentDate.getHours();
 
   const settings = {
     className: 'slider variable-width',
@@ -47,16 +69,22 @@ export const HomePage = ({ address }: TProps) => {
     variableWidth: true,
   };
 
-  const generateGreeting = (): string => {
-    if (currentHour < 12) {
-      return 'Good morning';
-    }
+  useEffect(() => {
+    axios
+      .get<Metadata>(`${API}/${API_URL.FETCH_METADATA}`, {
+        headers: headersConfiguration,
+      })
+      .then((res) => {
+        const response = res.data;
 
-    if (currentHour < 18) {
-      return 'Good afternoon';
-    }
-    return 'Good evening';
-  };
+        setLocalState({
+          ...localState,
+          products: response.products,
+          featured_products: response.featured_products,
+          news: response.news,
+        });
+      });
+  }, []);
 
   return (
     <HomepageContainer>
@@ -64,7 +92,7 @@ export const HomePage = ({ address }: TProps) => {
       <HomePageContent>
         <InnerHomePageContent>
           <HomePageHeaderTitle>
-            {generateGreeting()}, <b>Mobin!!</b>
+            <Greeting userName='Mobil' />
           </HomePageHeaderTitle>
           <MapInput onClick={() => history.push('/map')}>
             <img
@@ -77,68 +105,49 @@ export const HomePage = ({ address }: TProps) => {
             <p className='title'>{address}</p>
           </MapInput>
           <Card title='Featured'>
-            <FeaturedContainer>
-              <Product title='Cleaning' url='/assets/images/2-icon.png' />
-              <Product title='Cleaning' url='/assets/images/2-icon.png' />
-              <Product title='Cleaning' url='/assets/images/2-icon.png' />
-            </FeaturedContainer>
+            <Products products={localState.featured_products} forCollapsed />
           </Card>
-          <FeaturedContainer>
-            <Product title='Cleaning' url='/assets/images/2-icon.png' />
-            <Product title='Cleaning' url='/assets/images/2-icon.png' />
-            <Product title='Cleaning' url='/assets/images/2-icon.png' />
-          </FeaturedContainer>
-          <FeaturedContainer>
-            <Product title='Cleaning' url='/assets/images/2-icon.png' />
-            <Product title='Cleaning' url='/assets/images/2-icon.png' />
-            <Product title='Cleaning' url='/assets/images/2-icon.png' />
-          </FeaturedContainer>
-          <Collapse isOpen={collapsed} style={{ width: '100%' }}>
-            <FeaturedContainer>
-              <Product title='Cleaning' url='/assets/images/2-icon.png' />
-              <Product title='Cleaning' url='/assets/images/2-icon.png' />
-              <Product title='Cleaning' url='/assets/images/2-icon.png' />
-            </FeaturedContainer>
-            <FeaturedContainer>
-              <Product title='Cleaning' url='/assets/images/2-icon.png' />
-              <Product title='Cleaning' url='/assets/images/2-icon.png' />
-              <Product title='Cleaning' url='/assets/images/2-icon.png' />
-            </FeaturedContainer>
-            <FeaturedContainer>
-              <Product title='Cleaning' url='/assets/images/2-icon.png' />
-              <Product title='Cleaning' url='/assets/images/2-icon.png' />
-              <Product title='Cleaning' url='/assets/images/2-icon.png' />
-            </FeaturedContainer>
+          <Collapse isOpen={true} style={{ width: '100%' }}>
+            <Products products={localState.products} />
           </Collapse>
-          {collapsed ? (
-            <FontAwesomeIcon
-              icon={faAngleUp}
-              size='3x'
-              onClick={() => setCollapsed(false)}
-            />
-          ) : (
-            <FontAwesomeIcon
-              icon={faAngleDown}
-              size='3x'
-              onClick={() => setCollapsed(true)}
-            />
-          )}
+          <Collapse isOpen={localState.collapsed} style={{ width: '100%' }}>
+            <Products products={localState.products} forCollapsed />
+          </Collapse>
+          {localState.products.length > 0 ? (
+            localState.collapsed ? (
+              <FontAwesomeIcon
+                icon={faAngleUp}
+                size='3x'
+                onClick={() =>
+                  setLocalState({ ...localState, collapsed: false })
+                }
+              />
+            ) : (
+              <FontAwesomeIcon
+                icon={faAngleDown}
+                size='3x'
+                onClick={() =>
+                  setLocalState({ ...localState, collapsed: true })
+                }
+              />
+            )
+          ) : null}
         </InnerHomePageContent>
         <hr />
         <WhatNewContainer>
           <h5>What's New</h5>
           <SliderContainer>
             <Slider {...settings}>
-              <BigCard
-                urlHeader='/assets/images/29.png'
-                title='How to Use the App'
-                subTitle='Getting access to on-demand'
-              />
-              <BigCard
-                urlHeader='/assets/images/27.png'
-                title='List Your Service on MyKuya'
-                subTitle='Do you offer ManPower'
-              />
+              {localState.news.map((v) => {
+                return (
+                  <BigCard
+                    key={v.id}
+                    urlHeader={v.image}
+                    title={v.title}
+                    subTitle={v.subTitle}
+                  />
+                );
+              })}
             </Slider>
           </SliderContainer>
         </WhatNewContainer>

@@ -58,13 +58,6 @@ export const MapInput = styled.div`
   }
 `;
 
-export const FeaturedContainer = styled.div`
-  display: flex;
-  width: 100%;
-  margin-top: 30px;
-  margin-bottom: 10px;
-`;
-
 export const WhatNewContainer = styled.div`
   padding-left: 20px;
   margin-bottom: 100px;

@@ -6,7 +6,7 @@ export interface MapAttribute {
   zoom: number;
 }
 
-export interface Product {
+export interface ProductItem {
   id: number;
   image: string;
   title: string;
