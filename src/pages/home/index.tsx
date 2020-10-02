@@ -15,6 +15,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleUp } from '@fortawesome/free-solid-svg-icons';
 import { faAngleDown } from '@fortawesome/free-solid-svg-icons';
 import { Greeting } from '../../components/greeting';
+import { ToastContainer, toast } from 'react-toastify';
 
 // STYLE
 import {
@@ -83,6 +84,14 @@ export const HomePage = ({ address }: TProps) => {
           featured_products: response.featured_products,
           news: response.news,
         });
+      })
+      .catch(() => {
+        toast(
+          'The API Server seems not to be started, Please check it on!!!!',
+          {
+            type: 'error',
+          },
+        );
       });
   }, []);
 
@@ -152,6 +161,7 @@ export const HomePage = ({ address }: TProps) => {
           </SliderContainer>
         </WhatNewContainer>
       </HomePageContent>
+      <ToastContainer />
     </HomepageContainer>
   );
 };
