@@ -5,10 +5,12 @@ export const FooterContainer = styled.div`
   position: fixed;
   align-items: center;
   bottom: 0;
-  width: 100%;
+  left: 0;
+  right: 0;
   height: 65px;
   border-top: 1px solid #ccc;
   background-color: #fff;
+  z-index: 1000;
 `;
 
 export const FooterItemContainer = styled.div`

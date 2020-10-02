@@ -4,12 +4,15 @@ export const HeaderContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  position: fixed;
+  position: fixed !important;
   top: 0;
-  width: 100%;
+  left: 0;
+  right: 0;
   height: 60px;
   border-bottom: 1px solid #ccc;
   background-color: #fff;
+  z-index: 100;
+  overflow: hidden;
 `;
 
 export const HeaderTitle = styled.p`
